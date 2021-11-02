@@ -13,5 +13,6 @@ namespace Business.Abstract
         PagedResponse<Product> GetAllWithPaged(int parentId, int pageNumber, int pageSize);
         PagedResponse<Product> GetAllWithSearch(int pageNumber, string filter);
         PagedResponse<Product> GetAllWithFilter(FilterQuery filter);
+        List<OrderCheck> StockAndPriceControl(List<OrderCheck> orderChecks);
     }
 }

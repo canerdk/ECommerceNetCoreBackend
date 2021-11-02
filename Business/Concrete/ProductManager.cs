@@ -45,5 +45,24 @@ namespace Business.Concrete
             throw new NotImplementedException();
         }
 
+        public List<OrderCheck> StockAndPriceControl(List<OrderCheck> orderChecks)
+        {
+            List<OrderCheck> OrderChecks = new List<OrderCheck>();            
+            foreach (var item in orderChecks)
+            {
+                var result = _productDal.Get(p => p.Id == item.Product.Id);
+                if (result.UnitsInStock != item.Product.UnitsInStock)
+                {
+                    item.Product.UnitsInStock = result.UnitsInStock;
+                }
+                OrderCheck order = new OrderCheck
+                {
+                    Product = item.Product,
+                    Quantity = item.Quantity
+                };
+                OrderChecks.Add(order);
+            }
+            return OrderChecks;
+        }
     }
 }
