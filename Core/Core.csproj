@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Entities\Concrete\" />
     <Folder Include="Utilities\Business\" />
     <Folder Include="Utilities\PaginationHelper\" />
   </ItemGroup>

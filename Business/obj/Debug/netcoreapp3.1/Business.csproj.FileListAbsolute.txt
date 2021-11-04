@@ -14,3 +14,4 @@ C:\Users\Gorkem\Desktop\Caner\Ecommerce\ECommerce\Business\obj\Debug\netcoreapp3
 C:\Users\Gorkem\Desktop\Caner\Ecommerce\ECommerce\Business\obj\Debug\netcoreapp3.1\Business.csproj.CoreCompileInputs.cache
 C:\Users\Gorkem\Desktop\Caner\Ecommerce\ECommerce\Business\obj\Debug\netcoreapp3.1\Business.dll
 C:\Users\Gorkem\Desktop\Caner\Ecommerce\ECommerce\Business\obj\Debug\netcoreapp3.1\Business.pdb
+C:\Users\Gorkem\Desktop\Caner\Ecommerce\ECommerce\Business\obj\Debug\netcoreapp3.1\Business.csproj.CopyComplete

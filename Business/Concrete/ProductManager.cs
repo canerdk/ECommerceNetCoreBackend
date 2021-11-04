@@ -1,5 +1,4 @@
 ﻿using Business.Abstract;
-using Core.Entities.Concrete;
 using DataAccess.Abstract;
 using Entities.Concrete;
 using System;
@@ -23,26 +22,35 @@ namespace Business.Concrete
             return _productDal.GetAll();
         }
 
+        //public PagedResponse<Product> GetAllProducts(int pageNumber, int pageSize)
+        //{
+        //    return _productDal.GetAllProducts(pageNumber, pageSize);
+        //}
 
-        public PagedResponse<Product> GetAllWithFilter(FilterQuery filter)
-        {
-            return _productDal.GetAllWithFilter(filter);
-        }
+        //public PagedResponse<Product> GetAllWithFilter(FilterQuery filter)
+        //{
+        //    return _productDal.GetAllWithFilter(filter);
+        //}
 
-        public PagedResponse<Product> GetAllWithPaged(int parentId, int pageNumber, int pageSize)
-        {
-            return _productDal.PaginationQuery(pageNumber, pageSize, parentId);
-        }
+        //public PagedResponse<Product> GetAllWithPaged(int parentId, int pageNumber, int pageSize)
+        //{
+        //    return _productDal.PaginationQuery(pageNumber, pageSize, parentId);
+        //}
 
 
-        public PagedResponse<Product> GetAllWithSearch(int pageNumber, string filter)
-        {
-            return _productDal.SearchQuery(pageNumber, filter);
-        }
+        //public PagedResponse<Product> GetAllWithSearch(int pageNumber, string filter)
+        //{
+        //    return _productDal.SearchQuery(pageNumber, filter);
+        //}
 
         public Product GetById(int productId)
         {
             throw new NotImplementedException();
+        }
+
+        public Filter GetProductsFilter()
+        {
+            return _productDal.GetProductsFilter();
         }
 
         public List<OrderCheck> StockAndPriceControl(List<OrderCheck> orderChecks)

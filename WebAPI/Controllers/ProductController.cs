@@ -1,5 +1,4 @@
 ﻿using Business.Abstract;
-using Core.Entities.Concrete;
 using Entities.Concrete;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -21,28 +20,40 @@ namespace WebAPI.Controllers
             _productService = productService;
         }
 
-        [HttpGet("getproductsbypagination")]
-        public IActionResult GetProductsWithPagination(int parentId, int pageNumber, int pageSize)
+        //[HttpGet("getall")]
+        //public IActionResult GetAll(int pageNumber, int pageSize)
+        //{
+        //    return Ok(_productService.GetAllProducts(pageNumber, pageSize));
+        //}
+
+        [HttpGet("getproductsfilter")]
+        public IActionResult GetProductsFilter()
         {
-            var result = _productService.GetAllWithPaged(parentId, pageNumber, pageSize);
-            return Ok(result);
+            return Ok(_productService.GetProductsFilter());
         }
 
+        //[HttpGet("getproductsbypagination")]
+        //public IActionResult GetProductsWithPagination(int parentId, int pageNumber, int pageSize)
+        //{
+        //    var result = _productService.GetAllWithPaged(parentId, pageNumber, pageSize);
+        //    return Ok(result);
+        //}
 
-        [HttpGet("getproductsbysearch")]
-        public IActionResult GetProductsWithSearch(int pageNumber, string filter)
-        {
-            var result = _productService.GetAllWithSearch(pageNumber, filter);
-            return Ok(result);
-        }
+
+        //[HttpGet("getproductsbysearch")]
+        //public IActionResult GetProductsWithSearch(int pageNumber, string filter)
+        //{
+        //    var result = _productService.GetAllWithSearch(pageNumber, filter);
+        //    return Ok(result);
+        //}
 
 
-        [HttpPost("getproductswithfilter")]
-        public IActionResult GetProductsWithFilter([FromBody]FilterQuery filter)
-        {
-            var result = _productService.GetAllWithFilter(filter);
-            return Ok(result);
-        }
+        //[HttpPost("getproductswithfilter")]
+        //public IActionResult GetProductsWithFilter([FromBody]FilterQuery filter)
+        //{
+        //    var result = _productService.GetAllWithFilter(filter);
+        //    return Ok(result);
+        //}
 
         [HttpPost("productscheck")]
         public IActionResult ProductsCheck([FromBody]List<OrderCheck> orderChecks)
