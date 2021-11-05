@@ -56,7 +56,6 @@ namespace Business.Concrete
             return await _productDal.GetProductsFilter();
         }
 
-        [CacheAspect]
         public async Task<ProductResponse> GetProductsWithPagination(int pageNumber, int pageSize)
         {
             return await _productDal.GetProductsWithPagination(pageNumber, pageSize);
