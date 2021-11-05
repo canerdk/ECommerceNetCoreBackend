@@ -1,27 +1,29 @@
 ﻿using Core.DataAccess.EntityFramework;
 using DataAccess.Abstract;
 using Entities.Concrete;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace DataAccess.Concrete.EntityFramework
 {
     public class EfProductDal : EfEntityRepositoryBase<Product, ECommerceContext>, IProductDal
     {
-        public Filter GetProductsFilter()
+        public async Task<Filter> GetProductsFilter()
         {
             using (ECommerceContext context = new ECommerceContext())
             {
                 Filter filter = new Filter();
-                var productsColorAndCategory = context.Products.GroupBy(g => new { g.ColorId, g.ParentCategoryId }).Select(s => new { colors = s.Key.ColorId, categories = s.Key.ParentCategoryId }).ToList();
-                var productsPrices = context.Products.Select(x => x.UnitPrice).Distinct().ToList();
+                var productsColorAndCategory = await context.Products.GroupBy(g => new { g.ColorId, g.ParentCategoryId }).Select(s => new { colors = s.Key.ColorId, categories = s.Key.ParentCategoryId }).ToListAsync();
+                var productsPrices = await context.Products.Select(x => x.UnitPrice).Distinct().ToListAsync();
                 var colorId = productsColorAndCategory.Select(c => int.Parse(c.colors)).Distinct().ToList();
                 var categoryId = productsColorAndCategory.Select(c => c.categories).Distinct().ToList();
-                var productsColor = context.Colors.Where(c => colorId.Any(x => c.Id == x)).ToList();
-                var productsCategory = context.ParentCategories.Where(c => categoryId.Any(x => c.Id == x)).ToList();
+                var productsColor = await context.Colors.Where(c => colorId.Any(x => c.Id == x)).ToListAsync();
+                var productsCategory = await context.ParentCategories.Where(c => categoryId.Any(x => c.Id == x)).ToListAsync();
                 filter.Colors = productsColor;
                 filter.ParentCategories = productsCategory;
                 filter.MinPrice = productsPrices.Min();
@@ -29,6 +31,26 @@ namespace DataAccess.Concrete.EntityFramework
                 return filter;
             }
         }
+
+        public async Task<ProductResponse> GetProductsWithPagination(int pageNumber, int pageSize)
+        {
+            using (ECommerceContext context = new ECommerceContext())
+            {
+                ProductResponse productResponse = new ProductResponse();
+                Pagination pagination = new Pagination();
+                int count = await context.Products.CountAsync();
+                var products = await context.Products.OrderByDescending(o => o.Id).Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+                pagination.PageNumber = pageNumber;
+                pagination.PageSize = pageSize;
+                pagination.TotalPages = (int)Math.Ceiling(count / (double)pageSize);
+                pagination.TotalRecords = count;
+                productResponse.Products = products;
+                productResponse.Pagination = pagination;
+
+                return productResponse;
+            }
+        }
+
 
 
         //public PagedResponse<Product> GetAllProducts(int pageNumber, int pageSize)
@@ -66,10 +88,10 @@ namespace DataAccess.Concrete.EntityFramework
         //        response.PageSize = pageSize;
         //        response.TotalPages = (int)Math.Ceiling(count / (double)pageSize);
         //        response.TotalRecords = count;
-                
+
         //        return response;                
         //    }
-            
+
         //}
 
         //public PagedResponse<Product> GetAllWithFilter(FilterQuery filter)

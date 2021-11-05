@@ -20,16 +20,16 @@ namespace WebAPI.Controllers
             _productService = productService;
         }
 
-        //[HttpGet("getall")]
-        //public IActionResult GetAll(int pageNumber, int pageSize)
-        //{
-        //    return Ok(_productService.GetAllProducts(pageNumber, pageSize));
-        //}
+        [HttpGet("getall")]
+        public async Task<IActionResult> GetAll(int pageNumber, int pageSize)
+        {
+            return Ok(await _productService.GetProductsWithPagination(pageNumber, pageSize));
+        }
 
         [HttpGet("getproductsfilter")]
-        public IActionResult GetProductsFilter()
+        public async Task<IActionResult> GetProductsFilter()
         {
-            return Ok(_productService.GetProductsFilter());
+            return Ok(await _productService.GetProductsFilter());
         }
 
         //[HttpGet("getproductsbypagination")]

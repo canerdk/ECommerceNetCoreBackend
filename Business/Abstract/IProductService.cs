@@ -3,6 +3,7 @@ using Entities.Concrete;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Business.Abstract
 {
@@ -15,6 +16,7 @@ namespace Business.Abstract
         //PagedResponse<Product> GetAllWithSearch(int pageNumber, string filter);
         //PagedResponse<Product> GetAllWithFilter(FilterQuery filter);
         List<OrderCheck> StockAndPriceControl(List<OrderCheck> orderChecks);
-        Filter GetProductsFilter();
+        Task<Filter> GetProductsFilter();
+        Task<ProductResponse> GetProductsWithPagination(int pageNumber, int pageSize);
     }
 }

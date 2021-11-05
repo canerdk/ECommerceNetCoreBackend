@@ -1,4 +1,5 @@
 ﻿using Business.Abstract;
+using Core.Aspects.Autofac.Caching;
 using DataAccess.Abstract;
 using Entities.Concrete;
 using System;
@@ -6,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Business.Concrete
 {
@@ -48,9 +50,16 @@ namespace Business.Concrete
             throw new NotImplementedException();
         }
 
-        public Filter GetProductsFilter()
+        [CacheAspect]
+        public async Task<Filter> GetProductsFilter()
         {
-            return _productDal.GetProductsFilter();
+            return await _productDal.GetProductsFilter();
+        }
+
+        [CacheAspect]
+        public async Task<ProductResponse> GetProductsWithPagination(int pageNumber, int pageSize)
+        {
+            return await _productDal.GetProductsWithPagination(pageNumber, pageSize);
         }
 
         public List<OrderCheck> StockAndPriceControl(List<OrderCheck> orderChecks)
