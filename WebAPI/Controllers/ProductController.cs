@@ -1,4 +1,6 @@
-﻿using Business.Abstract;
+﻿using AutoMapper;
+using Business.Abstract;
+using Business.ElasticSearchOptions.Abstract;
 using Entities.Concrete;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -14,10 +16,13 @@ namespace WebAPI.Controllers
     [ApiController]
     public class ProductController : ControllerBase
     {
-        IProductService _productService;
-        public ProductController(IProductService productService)
+        private readonly IProductService _productService;
+        private readonly IElasticSearchService _elasticSearchService;
+        
+        public ProductController(IProductService productService, IElasticSearchService elasticSearchService)
         {
             _productService = productService;
+            _elasticSearchService = elasticSearchService;
         }
 
         [HttpGet("getall")]
@@ -31,6 +36,15 @@ namespace WebAPI.Controllers
         {
             return Ok(await _productService.GetProductsFilter());
         }
+
+        [HttpPost("add")]
+        public async Task<IActionResult> AddProducts(List<Product> products)
+        {
+            await _elasticSearchService.InsertDocuments("product", products);
+            return Ok();
+        }
+
+
 
         //[HttpGet("getproductsbypagination")]
         //public IActionResult GetProductsWithPagination(int parentId, int pageNumber, int pageSize)

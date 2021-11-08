@@ -1,7 +1,9 @@
 ﻿using Business.Abstract;
+using Business.ElasticSearchOptions.Abstract;
 using Core.Aspects.Autofac.Caching;
 using DataAccess.Abstract;
 using Entities.Concrete;
+using Nest;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,9 +16,11 @@ namespace Business.Concrete
     public class ProductManager : IProductService
     {
         IProductDal _productDal;
-        public ProductManager(IProductDal productDal)
+        private readonly IElasticSearchService _elasticSearchService;
+        public ProductManager(IProductDal productDal, IElasticSearchService elasticSearchService)
         {
             _productDal = productDal;
+            _elasticSearchService = elasticSearchService;
         }
 
         public List<Product> GetAll()
@@ -51,7 +55,7 @@ namespace Business.Concrete
         }
 
         [CacheAspect]
-        public async Task<Filter> GetProductsFilter()
+        public async Task<Entities.Concrete.Filter> GetProductsFilter()
         {
             return await _productDal.GetProductsFilter();
         }
@@ -80,5 +84,6 @@ namespace Business.Concrete
             }
             return OrderChecks;
         }
+
     }
 }

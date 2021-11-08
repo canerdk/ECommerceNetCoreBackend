@@ -72,4 +72,9 @@ C:\Users\Gorkem\Desktop\Caner\Ecommerce\ECommerce\WebAPI\obj\Debug\netcoreapp3.1
 C:\Users\Gorkem\Desktop\Caner\Ecommerce\ECommerce\WebAPI\obj\Debug\netcoreapp3.1\WebAPI.dll
 C:\Users\Gorkem\Desktop\Caner\Ecommerce\ECommerce\WebAPI\obj\Debug\netcoreapp3.1\WebAPI.pdb
 C:\Users\Gorkem\Desktop\Caner\Ecommerce\ECommerce\WebAPI\obj\Debug\netcoreapp3.1\WebAPI.genruntimeconfig.cache
+C:\Users\Gorkem\Desktop\Caner\Ecommerce\ECommerce\WebAPI\bin\Debug\netcoreapp3.1\AutoMapper.dll
+C:\Users\Gorkem\Desktop\Caner\Ecommerce\ECommerce\WebAPI\bin\Debug\netcoreapp3.1\AutoMapper.Extensions.Microsoft.DependencyInjection.dll
+C:\Users\Gorkem\Desktop\Caner\Ecommerce\ECommerce\WebAPI\bin\Debug\netcoreapp3.1\Elasticsearch.Net.dll
+C:\Users\Gorkem\Desktop\Caner\Ecommerce\ECommerce\WebAPI\bin\Debug\netcoreapp3.1\Nest.dll
+C:\Users\Gorkem\Desktop\Caner\Ecommerce\ECommerce\WebAPI\bin\Debug\netcoreapp3.1\Nest.JsonNetSerializer.dll
 C:\Users\Gorkem\Desktop\Caner\Ecommerce\ECommerce\WebAPI\obj\Debug\netcoreapp3.1\WebAPI.csproj.CopyComplete
