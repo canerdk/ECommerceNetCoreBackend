@@ -18,7 +18,7 @@ namespace Business.Concrete
 
         public List<ParentCategory> GetAll()
         {
-            throw new NotImplementedException();
+            return _parentCategoryDal.GetAll();
         }
 
         public ParentCategory GetById(int categoryId)

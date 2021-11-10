@@ -42,7 +42,7 @@ namespace WebAPI.Controllers
         {
             var products = _productService.GetAll();
             int skip = 0;
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 7; i++)
             {
                 await _elasticSearchService.InsertDocuments("product", products.Skip(skip).Take(200000).ToList());
                 skip += 200000;

@@ -1,4 +1,5 @@
-﻿using Entities.Concrete;
+﻿using Business.ElasticSearchOptions.Dtos;
+using Entities.Concrete;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,6 +16,6 @@ namespace Business.ElasticSearchOptions.Abstract
         Task<List<Product>> GetDocuments(string indexName);
         Task DeleteIndex(string indexName, int productId);
         Task AddOrUpdate(string indexName, Product product);
-        Task<List<Product>> SearchAsync(string searchText, int skipItemCount, int maxItemCount);
+        Task<List<ProductElasticIndexDto>> SearchAsync(string searchText, int skipItemCount, int maxItemCount);
     }
 }

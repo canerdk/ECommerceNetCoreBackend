@@ -11,7 +11,6 @@ namespace Business.ElasticSearchOptions.Dtos
         public decimal UnitPrice { get; set; }
         public int UnitsInStock { get; set; }
         public string Code { get; set; }
-        public string Category { get; set; }
         public string Color { get; set; }
     }
 }

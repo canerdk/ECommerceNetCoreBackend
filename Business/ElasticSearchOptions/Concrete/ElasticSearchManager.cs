@@ -61,6 +61,7 @@ namespace Business.ElasticSearchOptions.Concrete
         {
             List<ProductElasticIndexDto> productElasticIndexDtos = new List<ProductElasticIndexDto>();
             ProductElasticIndexDto productElasticIndexDto = new ProductElasticIndexDto();
+            var color = _color.GetAll();
             foreach (var item in products)
             {
                 productElasticIndexDto = new ProductElasticIndexDto()
@@ -68,10 +69,9 @@ namespace Business.ElasticSearchOptions.Concrete
                     Id = item.Id,
                     Code = item.Code,
                     Name = item.Name,
-                    Color = _color.GetById(Convert.ToInt32(item.ColorId)).Name,
+                    Color = color.FirstOrDefault(c => c.Id == Convert.ToInt32(item.ColorId)).Name,
                     UnitPrice = item.UnitPrice,
-                    UnitsInStock = item.UnitsInStock,
-                    Category = _category.GetById(item.Id).Name
+                    UnitsInStock = item.UnitsInStock
                 };
                 productElasticIndexDtos.Add(productElasticIndexDto);
             }
@@ -107,22 +107,22 @@ namespace Business.ElasticSearchOptions.Concrete
             }
         }
 
-        public Task<List<Product>> SearchAsync(string searchText, int skipItemCount, int maxItemCount)
+        public Task<List<ProductElasticIndexDto>> SearchAsync(string searchText, int skipItemCount, int maxItemCount)
         {
-            List<Product> products = new List<Product>();
-            var searchQuery = new SearchDescriptor<Product>();
-            //searchQuery = new SearchDescriptor<Product>().Query(q => q
-            //.MultiMatch(m => m.Fields(f => f.Field(ff => ff.Name, 3.0)
-            //                                .Field(ff => ff.Code, 2.0)
-            //                                .Field(ff => ff.ColorId, 1.5))
-            //.Query(searchText).Type(TextQueryType.BestFields).Operator(Operator.Or).MinimumShouldMatch(3))).Sort(s => s.Descending(f => f.Id));
-            searchQuery = new SearchDescriptor<Product>().Query(q => q
-            .MatchPhrasePrefix(m => m.Field(f => f.Name).Query(searchText)) || q.MatchPhrasePrefix(m => m.Field(f => f.ColorId).Query(searchText)));
+            var searchQuery = new SearchDescriptor<ProductElasticIndexDto>();
+            searchQuery = new SearchDescriptor<ProductElasticIndexDto>().Query(q => q
+            .MultiMatch(m => m.Fields(f => f.Field(ff => ff.Name, 50)
+                                            .Field(ff => ff.Code, 20)
+                                            .Field(ff => ff.Color, 10))
+            .Query(searchText).Type(TextQueryType.PhrasePrefix).Operator(Operator.Or).MinimumShouldMatch(3)));
+            //searchQuery = new SearchDescriptor<ProductElasticIndexDto>().Query(q => 
+            //q.MatchPhrasePrefix(m => m.Field(f => f.Name).Query(searchText)) ||
+            //q.MatchPhrasePrefix(m => m.Field(f => f.Color).Query(searchText)));
 
             searchQuery.Index("product");
             searchQuery.Skip(skipItemCount).Take(maxItemCount);
 
-             var result = _client.Search<Product>(searchQuery);
+             var result = _client.Search<ProductElasticIndexDto>(searchQuery);
 
             return Task.FromResult(result.Documents.ToList());
         }
