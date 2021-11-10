@@ -21,6 +21,11 @@ namespace Business.Concrete
             throw new NotImplementedException();
         }
 
+        public ParentCategory GetById(int categoryId)
+        {
+            return _parentCategoryDal.Get(c => c.Id == categoryId);
+        }
+
         public List<ParentCategory> GetParentsWithCategory(int categoryId)
         {
             return _parentCategoryDal.GetAll(x => x.CategoryId == categoryId);

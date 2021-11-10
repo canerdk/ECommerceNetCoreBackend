@@ -18,7 +18,7 @@ namespace WebAPI.Controllers
     {
         private readonly IProductService _productService;
         private readonly IElasticSearchService _elasticSearchService;
-        
+
         public ProductController(IProductService productService, IElasticSearchService elasticSearchService)
         {
             _productService = productService;
@@ -38,10 +38,43 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("add")]
-        public async Task<IActionResult> AddProducts(List<Product> products)
+        public async Task<IActionResult> AddProducts()
         {
-            await _elasticSearchService.InsertDocuments("product", products);
+            var products = _productService.GetAll();
+            int skip = 0;
+            for (int i = 0; i < 5; i++)
+            {
+                await _elasticSearchService.InsertDocuments("product", products.Skip(skip).Take(200000).ToList());
+                skip += 200000;
+            }
+            
+            
+            
+            return Ok("asd");
+        }
+
+        [HttpPost("addorupdate")]
+        public async Task<IActionResult> AddProducts(string indexName, int productId)
+        {
+            Product product = _productService.GetById(productId);
+            product.UnitPrice = 450;
+            await _elasticSearchService.AddOrUpdate(indexName, product);
+
+            return Ok("asd");
+        }
+
+        [HttpPost("delete")]
+        public async Task<IActionResult> DeleteIndex(string indexName, int productId)
+        {
+            await _elasticSearchService.DeleteIndex(indexName, productId);
             return Ok();
+        }
+
+        [HttpPost("search")]
+        public async Task<IActionResult> Search(string searchText, int skip, int count)
+        {
+            var result = await _elasticSearchService.SearchAsync(searchText, skip, count);
+            return Ok(result);
         }
 
 
@@ -70,7 +103,7 @@ namespace WebAPI.Controllers
         //}
 
         [HttpPost("productscheck")]
-        public IActionResult ProductsCheck([FromBody]List<OrderCheck> orderChecks)
+        public IActionResult ProductsCheck([FromBody] List<OrderCheck> orderChecks)
         {
             var result = _productService.StockAndPriceControl(orderChecks);
             return Ok(result);

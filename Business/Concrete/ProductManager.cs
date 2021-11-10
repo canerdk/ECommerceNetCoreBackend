@@ -51,7 +51,7 @@ namespace Business.Concrete
 
         public Product GetById(int productId)
         {
-            throw new NotImplementedException();
+            return _productDal.Get(x => x.Id == productId);
         }
 
         [CacheAspect]

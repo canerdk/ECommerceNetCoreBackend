@@ -11,5 +11,6 @@ namespace Business.Abstract
     {
         List<ParentCategory> GetAll();
         List<ParentCategory> GetParentsWithCategory(int categoryId);
+        ParentCategory GetById(int categoryId);
     }
 }
