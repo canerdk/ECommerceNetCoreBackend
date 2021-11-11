@@ -1,6 +1,7 @@
 ﻿using Business.Abstract;
 using Business.ElasticSearchOptions.Abstract;
 using Business.ElasticSearchOptions.Dtos;
+using Elasticsearch.Net;
 using Entities.Concrete;
 using Microsoft.Extensions.Configuration;
 using Nest;
@@ -92,8 +93,8 @@ namespace Business.ElasticSearchOptions.Concrete
 
         public async Task DeleteIndex(string indexName, int productId)
         {
-            await _client.DeleteAsync(new DeleteRequest(indexName, productId));
-            //await _client.Indices.DeleteAsync(indexName);
+            //await _client.DeleteAsync(new DeleteRequest(indexName, productId));
+            await _client.Indices.DeleteAsync(indexName);
         }
 
         public async Task AddOrUpdate(string indexName, Product product)
@@ -107,24 +108,42 @@ namespace Business.ElasticSearchOptions.Concrete
             }
         }
 
-        public Task<List<ProductElasticIndexDto>> SearchAsync(string searchText, int skipItemCount, int maxItemCount)
+        public async Task<List<ProductElasticIndexDto>> SearchAsync(string searchText, string indexName, int skipItemCount, int maxItemCount)
         {
             var searchQuery = new SearchDescriptor<ProductElasticIndexDto>();
             searchQuery = new SearchDescriptor<ProductElasticIndexDto>().Query(q => q
-            .MultiMatch(m => m.Fields(f => f.Field(ff => ff.Name, 50)
-                                            .Field(ff => ff.Code, 20)
-                                            .Field(ff => ff.Color, 10))
-            .Query(searchText).Type(TextQueryType.PhrasePrefix).Operator(Operator.Or).MinimumShouldMatch(3)));
-            //searchQuery = new SearchDescriptor<ProductElasticIndexDto>().Query(q => 
-            //q.MatchPhrasePrefix(m => m.Field(f => f.Name).Query(searchText)) ||
-            //q.MatchPhrasePrefix(m => m.Field(f => f.Color).Query(searchText)));
+            .MultiMatch(m => m.Fields(f => f.Field(ff => ff.Name, 2)
+                                            .Field(ff => ff.Code, 3)
+                                            .Field(ff => ff.Color, 1))
+            .Query(searchText).Type(TextQueryType.CrossFields).Operator(Operator.Or).MinimumShouldMatch(2)));
 
-            searchQuery.Index("product");
+            searchQuery.Index(indexName);
             searchQuery.Skip(skipItemCount).Take(maxItemCount);
 
-             var result = _client.Search<ProductElasticIndexDto>(searchQuery);
+             var result = await _client.SearchAsync<ProductElasticIndexDto>(searchQuery);
 
-            return Task.FromResult(result.Documents.ToList());
+            return result.Documents.ToList();
+        }
+
+
+        public async Task CreateIndexAsync(string indexName)
+        {
+            var exist = await _client.Indices.ExistsAsync(indexName);
+            if (exist.Exists)
+                return;
+
+            var result = await _client.Indices.CreateAsync(indexName, ss => ss.Index(indexName).Settings(o => o.NumberOfShards(4).NumberOfReplicas(2).Setting("max_result_window", int.MaxValue).Analysis(a => a.TokenFilters(t => t.AsciiFolding("my_ascii_folding", af => af.PreserveOriginal(true)))
+            .Analyzers(aa => aa.Custom("turkish_analyzer", ca => ca.Filters("lowercase", "my_ascii_folding").Tokenizer("standard")))))
+            .ProductMapping());
+
+
+            if (result.Acknowledged)
+            {
+                await _client.Indices.PutAliasAsync(new PutAliasRequest(indexName, "index"));
+                return;
+            }
+            var alias = await _client.Indices.GetAliasAsync(indexName);
+            throw new ElasticsearchClientException($"Insert Docuemnt failed at index {indexName} :" + result.ServerError.Error.Reason);
         }
     }
 }

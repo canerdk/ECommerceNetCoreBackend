@@ -38,13 +38,13 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("add")]
-        public async Task<IActionResult> AddProducts()
+        public async Task<IActionResult> AddProducts(string indexName)
         {
-            var products = _productService.GetAll();
+            var products = _productService.GetAll().OrderBy(o => o.Id).ToList();
             int skip = 0;
             for (int i = 0; i < 7; i++)
             {
-                await _elasticSearchService.InsertDocuments("product", products.Skip(skip).Take(200000).ToList());
+                await _elasticSearchService.InsertDocuments(indexName, products.Skip(skip).Take(200000).ToList());
                 skip += 200000;
             }
             
@@ -71,12 +71,18 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("search")]
-        public async Task<IActionResult> Search(string searchText, int skip, int count)
+        public async Task<IActionResult> Search(string searchText, string indexName, int skip, int count)
         {
-            var result = await _elasticSearchService.SearchAsync(searchText, skip, count);
+            var result = await _elasticSearchService.SearchAsync(searchText, indexName, skip, count);
             return Ok(result);
         }
 
+        [HttpPost("createindex")]
+        public async Task<IActionResult> CreateIndexAsyncs(string index)
+        {
+            await _elasticSearchService.CreateIndexAsync(index);
+            return Ok();
+        }
 
 
         //[HttpGet("getproductsbypagination")]

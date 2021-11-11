@@ -16,6 +16,7 @@ namespace Business.ElasticSearchOptions.Abstract
         Task<List<Product>> GetDocuments(string indexName);
         Task DeleteIndex(string indexName, int productId);
         Task AddOrUpdate(string indexName, Product product);
-        Task<List<ProductElasticIndexDto>> SearchAsync(string searchText, int skipItemCount, int maxItemCount);
+        Task<List<ProductElasticIndexDto>> SearchAsync(string searchText, string indexName, int skipItemCount, int maxItemCount);
+        Task CreateIndexAsync(string indexName);
     }
 }
