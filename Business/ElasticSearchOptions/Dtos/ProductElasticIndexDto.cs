@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Business.ElasticSearchOptions.Concrete;
+using System;
 using System.Collections.Generic;
 using System.Text;
 

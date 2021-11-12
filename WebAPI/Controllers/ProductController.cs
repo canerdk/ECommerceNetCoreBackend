@@ -71,9 +71,9 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("search")]
-        public async Task<IActionResult> Search(string searchText, string indexName, int skip, int count)
+        public async Task<IActionResult> Search(string searchText, [FromBody]Filter filter, string indexName, int skip, int count)
         {
-            var result = await _elasticSearchService.SearchAsync(searchText, indexName, skip, count);
+            var result = await _elasticSearchService.SearchAsync(searchText, filter, indexName, skip, count);
             return Ok(result);
         }
 

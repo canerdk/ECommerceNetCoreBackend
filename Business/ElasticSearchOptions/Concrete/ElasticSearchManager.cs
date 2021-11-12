@@ -108,21 +108,34 @@ namespace Business.ElasticSearchOptions.Concrete
             }
         }
 
-        public async Task<List<ProductElasticIndexDto>> SearchAsync(string searchText, string indexName, int skipItemCount, int maxItemCount)
+        public async Task<List<ProductElasticIndexDto>> SearchAsync(string searchText, Entities.Concrete.Filter filter, string indexName, int skipItemCount, int maxItemCount)
         {
+            string[] splittedText = searchText.Split(' ');
             var searchQuery = new SearchDescriptor<ProductElasticIndexDto>();
-            searchQuery = new SearchDescriptor<ProductElasticIndexDto>().Query(q => q
-            .MultiMatch(m => m.Fields(f => f.Field(ff => ff.Name, 2)
-                                            .Field(ff => ff.Code, 3)
-                                            .Field(ff => ff.Color, 1))
-            .Query(searchText).Type(TextQueryType.CrossFields).Operator(Operator.Or).MinimumShouldMatch(2)));
+            if (filter.MinPrice > 0 || filter.MaxPrice > 0)
+            {
+                searchQuery = new SearchDescriptor<ProductElasticIndexDto>().Query(q => q
+                .MultiMatch(m => m.Fields(f => f.Field(ff => ff.Name, 8.0)
+                                            .Field(ff => ff.Code, 4.0)
+                                            .Field(ff => ff.Color, 2.0))
+                .Query(searchText).Type(TextQueryType.CrossFields).Operator(Operator.Or).MinimumShouldMatch(2)) && q.Range(r => r.Field(rf => rf.UnitPrice).GreaterThanOrEquals((double?)filter.MinPrice)) && q.Range(r => r.Field(rf => rf.UnitPrice).LessThanOrEquals((double?)filter.MaxPrice)));
+            }
+            else
+            {
+                searchQuery = new SearchDescriptor<ProductElasticIndexDto>().Query(q => q
+                .MultiMatch(m => m.Fields(f => f.Field(ff => ff.Name, 8.0)
+                                            .Field(ff => ff.Code, 4.0)
+                                            .Field(ff => ff.Color, 2.0))
+                .Query(searchText).Type(TextQueryType.CrossFields).Operator(Operator.Or).MinimumShouldMatch(splittedText.Length)));
+            }
+
 
             searchQuery.Index(indexName);
             searchQuery.Skip(skipItemCount).Take(maxItemCount);
 
-             var result = await _client.SearchAsync<ProductElasticIndexDto>(searchQuery);
+            var searchResponse = await _client.SearchAsync<ProductElasticIndexDto>(searchQuery);
 
-            return result.Documents.ToList();
+            return searchResponse.Documents.ToList();
         }
 
 
