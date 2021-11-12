@@ -11,5 +11,7 @@ namespace Entities.Concrete
         public List<Color> Colors { get; set; }
         public decimal MinPrice { get; set; }
         public decimal MaxPrice { get; set; }
+        public string MinDate { get; set; }
+        public string MaxDate { get; set; }
     }
 }

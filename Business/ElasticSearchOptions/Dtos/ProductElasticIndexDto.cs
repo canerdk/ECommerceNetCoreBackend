@@ -13,5 +13,6 @@ namespace Business.ElasticSearchOptions.Dtos
         public int UnitsInStock { get; set; }
         public string Code { get; set; }
         public string Color { get; set; }
+        public DateTime AddedDate { get; set; }
     }
 }

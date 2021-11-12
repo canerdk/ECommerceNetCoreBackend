@@ -62,9 +62,13 @@ namespace Business.ElasticSearchOptions.Concrete
         {
             List<ProductElasticIndexDto> productElasticIndexDtos = new List<ProductElasticIndexDto>();
             ProductElasticIndexDto productElasticIndexDto = new ProductElasticIndexDto();
-            var color = _color.GetAll();
+            var color = _color.GetAll();            
             foreach (var item in products)
             {
+                Random gen = new Random();
+                DateTime startDate = new DateTime(2019, 1, 1);
+                int range = (DateTime.Today - startDate).Days;
+                
                 productElasticIndexDto = new ProductElasticIndexDto()
                 {
                     Id = item.Id,
@@ -72,8 +76,9 @@ namespace Business.ElasticSearchOptions.Concrete
                     Name = item.Name,
                     Color = color.FirstOrDefault(c => c.Id == Convert.ToInt32(item.ColorId)).Name,
                     UnitPrice = item.UnitPrice,
-                    UnitsInStock = item.UnitsInStock
-                };
+                    UnitsInStock = item.UnitsInStock,
+                    AddedDate = startDate.AddDays(gen.Next(range))
+            };
                 productElasticIndexDtos.Add(productElasticIndexDto);
             }
             await _client.IndexManyAsync(productElasticIndexDtos, index: indexName);
@@ -110,7 +115,8 @@ namespace Business.ElasticSearchOptions.Concrete
 
         public async Task<List<ProductElasticIndexDto>> SearchAsync(string searchText, Entities.Concrete.Filter filter, string indexName, int skipItemCount, int maxItemCount)
         {
-            string[] splittedText = searchText.Split(' ');
+            searchText = searchText ?? string.Empty;
+            string[] splittedText = searchText.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             var searchQuery = new SearchDescriptor<ProductElasticIndexDto>();
             if (filter.MinPrice > 0 || filter.MaxPrice > 0)
             {
@@ -118,7 +124,14 @@ namespace Business.ElasticSearchOptions.Concrete
                 .MultiMatch(m => m.Fields(f => f.Field(ff => ff.Name, 8.0)
                                             .Field(ff => ff.Code, 4.0)
                                             .Field(ff => ff.Color, 2.0))
-                .Query(searchText).Type(TextQueryType.CrossFields).Operator(Operator.Or).MinimumShouldMatch(2)) && q.Range(r => r.Field(rf => rf.UnitPrice).GreaterThanOrEquals((double?)filter.MinPrice)) && q.Range(r => r.Field(rf => rf.UnitPrice).LessThanOrEquals((double?)filter.MaxPrice)));
+                .Query(searchText).Type(TextQueryType.CrossFields).Operator(Operator.Or).MinimumShouldMatch(splittedText.Length)) && q.Range(r => r.Field(rf => rf.UnitPrice).GreaterThanOrEquals((double?)filter.MinPrice)) && q.Range(r => r.Field(rf => rf.UnitPrice).LessThanOrEquals((double?)filter.MaxPrice)));
+            }
+            else if(filter.MinDate != null || filter.MaxDate != null) {
+                searchQuery = new SearchDescriptor<ProductElasticIndexDto>().Query(q => q
+                .MultiMatch(m => m.Fields(f => f.Field(ff => ff.Name, 8.0)
+                                            .Field(ff => ff.Code, 4.0)
+                                            .Field(ff => ff.Color, 2.0))
+                .Query(searchText).Type(TextQueryType.CrossFields).Operator(Operator.Or).MinimumShouldMatch(splittedText.Length)) && q.DateRange(r => r.Field(rf => rf.AddedDate).GreaterThanOrEquals(filter.MinDate)) && q.DateRange(r => r.Field(rf => rf.AddedDate).LessThanOrEquals(filter.MaxDate))).Sort(s => s.Descending(a => a.AddedDate));
             }
             else
             {
@@ -128,7 +141,7 @@ namespace Business.ElasticSearchOptions.Concrete
                                             .Field(ff => ff.Color, 2.0))
                 .Query(searchText).Type(TextQueryType.CrossFields).Operator(Operator.Or).MinimumShouldMatch(splittedText.Length)));
             }
-
+            MultiMatchQueryDescriptor<ProductElasticIndexDto> multiMatchQueryDescriptor = new MultiMatchQueryDescriptor<ProductElasticIndexDto>();
 
             searchQuery.Index(indexName);
             searchQuery.Skip(skipItemCount).Take(maxItemCount);
