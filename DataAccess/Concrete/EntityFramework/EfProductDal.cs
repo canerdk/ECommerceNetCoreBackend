@@ -20,7 +20,7 @@ namespace DataAccess.Concrete.EntityFramework
                 Filter filter = new Filter();
                 var productsColorAndCategory = await context.Products.GroupBy(g => new { g.ColorId, g.ParentCategoryId }).Select(s => new { colors = s.Key.ColorId, categories = s.Key.ParentCategoryId }).ToListAsync();
                 var productsPrices = await context.Products.Select(x => x.UnitPrice).Distinct().ToListAsync();
-                var colorId = productsColorAndCategory.Select(c => int.Parse(c.colors)).Distinct().ToList();
+                var colorId = productsColorAndCategory.Select(c => c.colors).Distinct().ToList();
                 var categoryId = productsColorAndCategory.Select(c => c.categories).Distinct().ToList();
                 var productsColor = await context.Colors.Where(c => colorId.Any(x => c.Id == x)).ToListAsync();
                 var productsCategory = await context.ParentCategories.Where(c => categoryId.Any(x => c.Id == x)).ToListAsync();

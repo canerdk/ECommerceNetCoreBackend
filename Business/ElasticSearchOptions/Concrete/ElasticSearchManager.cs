@@ -13,6 +13,14 @@ using System.Threading.Tasks;
 
 namespace Business.ElasticSearchOptions.Concrete
 {
+    [Flags]
+    public enum Flags : byte
+    {
+        Yeni = 1,
+        Kilitli = 2,
+        Aktif = 4,
+        Promosyon = 8
+    }
     public class ElasticSearchManager : IElasticSearchService
     {
         private readonly IConfiguration _configuration;
@@ -26,6 +34,8 @@ namespace Business.ElasticSearchOptions.Concrete
             _client = CreateInstance();
             _color = color;
             _category = category;
+            Flags f = Flags.Kilitli | Flags.Promosyon;
+            bool result = f.HasFlag(Flags.Promosyon);
         }
 
         private ElasticClient CreateInstance()
@@ -62,7 +72,8 @@ namespace Business.ElasticSearchOptions.Concrete
         {
             List<ProductElasticIndexDto> productElasticIndexDtos = new List<ProductElasticIndexDto>();
             ProductElasticIndexDto productElasticIndexDto = new ProductElasticIndexDto();
-            var color = _color.GetAll();            
+            var color = _color.GetAll();
+            var p = products.GroupBy(g => g.LanguageId).ToList();
             foreach (var item in products)
             {
                 Random gen = new Random();
@@ -74,7 +85,7 @@ namespace Business.ElasticSearchOptions.Concrete
                     Id = item.Id,
                     Code = item.Code,
                     Name = item.Name,
-                    Color = color.FirstOrDefault(c => c.Id == Convert.ToInt32(item.ColorId)).Name,
+                    Color = color.FirstOrDefault(c => c.Id == item.ColorId).Name,
                     UnitPrice = item.UnitPrice,
                     UnitsInStock = item.UnitsInStock,
                     AddedDate = startDate.AddDays(gen.Next(range))
@@ -152,7 +163,7 @@ namespace Business.ElasticSearchOptions.Concrete
         }
 
 
-        public async Task CreateIndexAsync(string indexName)
+        public async Task CreateIndexAsync(string indexName, string aliasName)
         {
             var exist = await _client.Indices.ExistsAsync(indexName);
             if (exist.Exists)
@@ -165,7 +176,7 @@ namespace Business.ElasticSearchOptions.Concrete
 
             if (result.Acknowledged)
             {
-                await _client.Indices.PutAliasAsync(new PutAliasRequest(indexName, "index"));
+                await _client.Indices.PutAliasAsync(new PutAliasRequest(indexName, aliasName));
                 return;
             }
             var alias = await _client.Indices.GetAliasAsync(indexName);

@@ -13,6 +13,7 @@ namespace Entities.Concrete
         public int UnitsInStock { get; set; }
         public string Code { get; set; }
         public int ParentCategoryId { get; set; }
-        public string ColorId { get; set; }
+        public int ColorId { get; set; }
+        public int LanguageId { get; set; }
     }
 }

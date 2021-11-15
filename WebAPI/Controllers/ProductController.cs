@@ -41,15 +41,8 @@ namespace WebAPI.Controllers
         public async Task<IActionResult> AddProducts(string indexName)
         {
             var products = _productService.GetAll().OrderBy(o => o.Id).ToList();
-            int skip = 0;
-            for (int i = 0; i < 7; i++)
-            {
-                await _elasticSearchService.InsertDocuments(indexName, products.Skip(skip).Take(200000).ToList());
-                skip += 200000;
-            }
-            
-            
-            
+            await _elasticSearchService.InsertDocuments(indexName, products.ToList());
+
             return Ok("asd");
         }
 
@@ -78,9 +71,9 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("createindex")]
-        public async Task<IActionResult> CreateIndexAsyncs(string index)
+        public async Task<IActionResult> CreateIndexAsyncs(string index, string alias)
         {
-            await _elasticSearchService.CreateIndexAsync(index);
+            await _elasticSearchService.CreateIndexAsync(index, alias);
             return Ok();
         }
 
