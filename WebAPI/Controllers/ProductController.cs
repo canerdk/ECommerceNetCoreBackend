@@ -38,10 +38,10 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("add")]
-        public async Task<IActionResult> AddProducts(string indexName)
+        public async Task<IActionResult> AddProducts()
         {
             var products = _productService.GetAll().OrderBy(o => o.Id).ToList();
-            await _elasticSearchService.InsertDocuments(indexName, products.ToList());
+            await _elasticSearchService.InsertDocuments(products.ToList());
 
             return Ok("asd");
         }
@@ -70,12 +70,12 @@ namespace WebAPI.Controllers
             return Ok(result);
         }
 
-        [HttpPost("createindex")]
-        public async Task<IActionResult> CreateIndexAsyncs(string index, string alias)
-        {
-            await _elasticSearchService.CreateIndexAsync(index, alias);
-            return Ok();
-        }
+        //[HttpPost("createindex")]
+        //public async Task<IActionResult> CreateIndexAsyncs(string index, string alias)
+        //{
+        //    await _elasticSearchService.CreateIndexAsync(index, alias);
+        //    return Ok();
+        //}
 
 
         //[HttpGet("getproductsbypagination")]

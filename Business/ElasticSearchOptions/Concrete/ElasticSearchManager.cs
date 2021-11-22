@@ -13,29 +13,22 @@ using System.Threading.Tasks;
 
 namespace Business.ElasticSearchOptions.Concrete
 {
-    [Flags]
-    public enum Flags : byte
-    {
-        Yeni = 1,
-        Kilitli = 2,
-        Aktif = 4,
-        Promosyon = 8
-    }
+
     public class ElasticSearchManager : IElasticSearchService
     {
         private readonly IConfiguration _configuration;
         private readonly IElasticClient _client;
         private readonly IColorService _color;
         private readonly IParentCategoryService _category;
+        private readonly ILanguageService _languageService;
 
-        public ElasticSearchManager(IConfiguration configuration, IColorService color, IParentCategoryService category)
+        public ElasticSearchManager(IConfiguration configuration, IColorService color, IParentCategoryService category, ILanguageService languageService)
         {
             _configuration = configuration;
             _client = CreateInstance();
             _color = color;
             _category = category;
-            Flags f = Flags.Kilitli | Flags.Promosyon;
-            bool result = f.HasFlag(Flags.Promosyon);
+            _languageService = languageService;
         }
 
         private ElasticClient CreateInstance()
@@ -68,31 +61,43 @@ namespace Business.ElasticSearchOptions.Concrete
             }
         }
 
-        public async Task InsertDocuments(string indexName, List<Product> products)
+        public async Task InsertDocuments(List<Product> products)
         {
             List<ProductElasticIndexDto> productElasticIndexDtos = new List<ProductElasticIndexDto>();
             ProductElasticIndexDto productElasticIndexDto = new ProductElasticIndexDto();
             var color = _color.GetAll();
-            var p = products.GroupBy(g => g.LanguageId).ToList();
-            foreach (var item in products)
+            string indexName = "";
+            var language = _languageService.GetAll();
+
+            foreach (var product in products.GroupBy(g => g.LanguageId))
             {
-                Random gen = new Random();
-                DateTime startDate = new DateTime(2019, 1, 1);
-                int range = (DateTime.Today - startDate).Days;
-                
-                productElasticIndexDto = new ProductElasticIndexDto()
+
+                var p = products.Where(p => p.LanguageId == product.Key).ToList();
+                indexName = language.FirstOrDefault(x => x.Id == product.Key).Code.ToLower().Replace(" ", "");
+                await CreateIndexAsync(indexName + "index", indexName);
+                foreach (var item in p)
                 {
-                    Id = item.Id,
-                    Code = item.Code,
-                    Name = item.Name,
-                    Color = color.FirstOrDefault(c => c.Id == item.ColorId).Name,
-                    UnitPrice = item.UnitPrice,
-                    UnitsInStock = item.UnitsInStock,
-                    AddedDate = startDate.AddDays(gen.Next(range))
-            };
-                productElasticIndexDtos.Add(productElasticIndexDto);
+                    Random gen = new Random();
+                    DateTime startDate = new DateTime(2019, 1, 1);
+                    int range = (DateTime.Today - startDate).Days;
+
+                    productElasticIndexDto = new ProductElasticIndexDto()
+                    {
+                        Id = item.Id,
+                        Code = item.Code,
+                        Name = item.Name,
+                        Color = color.FirstOrDefault(c => c.Id == item.ColorId).Name,
+                        UnitPrice = item.UnitPrice,
+                        UnitsInStock = item.UnitsInStock,
+                        Language = language.FirstOrDefault(c => c.Id == item.LanguageId).Name,
+                        AddedDate = startDate.AddDays(gen.Next(range))
+                    };
+                    productElasticIndexDtos.Add(productElasticIndexDto);
+
+                }
+                await _client.IndexManyAsync(productElasticIndexDtos, index: indexName);
+                productElasticIndexDtos.Clear();
             }
-            await _client.IndexManyAsync(productElasticIndexDtos, index: indexName);
         }
 
         public async Task<Product> GetDocument(string indexName, int id)
@@ -137,7 +142,8 @@ namespace Business.ElasticSearchOptions.Concrete
                                             .Field(ff => ff.Color, 2.0))
                 .Query(searchText).Type(TextQueryType.CrossFields).Operator(Operator.Or).MinimumShouldMatch(splittedText.Length)) && q.Range(r => r.Field(rf => rf.UnitPrice).GreaterThanOrEquals((double?)filter.MinPrice)) && q.Range(r => r.Field(rf => rf.UnitPrice).LessThanOrEquals((double?)filter.MaxPrice)));
             }
-            else if(filter.MinDate != null || filter.MaxDate != null) {
+            else if (filter.MinDate != null || filter.MaxDate != null)
+            {
                 searchQuery = new SearchDescriptor<ProductElasticIndexDto>().Query(q => q
                 .MultiMatch(m => m.Fields(f => f.Field(ff => ff.Name, 8.0)
                                             .Field(ff => ff.Code, 4.0)
@@ -163,13 +169,13 @@ namespace Business.ElasticSearchOptions.Concrete
         }
 
 
-        public async Task CreateIndexAsync(string indexName, string aliasName)
+        private async Task CreateIndexAsync(string indexName, string aliasName)
         {
             var exist = await _client.Indices.ExistsAsync(indexName);
             if (exist.Exists)
                 return;
 
-            var result = await _client.Indices.CreateAsync(indexName, ss => ss.Index(indexName).Settings(o => o.NumberOfShards(4).NumberOfReplicas(2).Setting("max_result_window", int.MaxValue).Analysis(a => a.TokenFilters(t => t.AsciiFolding("my_ascii_folding", af => af.PreserveOriginal(true)))
+            var result = await _client.Indices.CreateAsync(indexName, ss => ss.Index(indexName).Settings(o => o.NumberOfShards(1).NumberOfReplicas(1).Setting("max_result_window", int.MaxValue).Analysis(a => a.TokenFilters(t => t.AsciiFolding("my_ascii_folding", af => af.PreserveOriginal(true)))
             .Analyzers(aa => aa.Custom("turkish_analyzer", ca => ca.Filters("lowercase", "my_ascii_folding").Tokenizer("standard")))))
             .ProductMapping());
 
@@ -180,7 +186,7 @@ namespace Business.ElasticSearchOptions.Concrete
                 return;
             }
             var alias = await _client.Indices.GetAliasAsync(indexName);
-            throw new ElasticsearchClientException($"Insert Docuemnt failed at index {indexName} :" + result.ServerError.Error.Reason);
+            throw new ElasticsearchClientException($"Insert Document failed at index {indexName} :" + result.ServerError.Error.Reason);
         }
     }
 }

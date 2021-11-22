@@ -14,10 +14,12 @@ namespace DataAccess.Concrete.EntityFramework
             optionsBuilder.UseNpgsql("Server=127.0.0.1;Database=ECommerce;User Id=postgres;Password=g;");
         }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder builder)
         {
-            modelBuilder.Entity<Product>()
-                .HasIndex(b => b.ColorId);
+            builder.Entity<Product>().HasKey(table => new {
+                table.Id,
+                table.LanguageId
+            });
         }
 
 
@@ -26,5 +28,6 @@ namespace DataAccess.Concrete.EntityFramework
         public DbSet<ParentCategory> ParentCategories { get; set; }
         public DbSet<Color> Colors { get; set; }
         public DbSet<CategoryProduct> CategoriesProducts { get; set; }
+        public DbSet<Language> Languages { get; set; }
     }
 }

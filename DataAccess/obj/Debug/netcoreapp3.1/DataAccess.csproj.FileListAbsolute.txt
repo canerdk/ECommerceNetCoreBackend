@@ -12,4 +12,3 @@ C:\Users\Gorkem\Desktop\Caner\Ecommerce\ECommerce\DataAccess\obj\Debug\netcoreap
 C:\Users\Gorkem\Desktop\Caner\Ecommerce\ECommerce\DataAccess\obj\Debug\netcoreapp3.1\DataAccess.csproj.CoreCompileInputs.cache
 C:\Users\Gorkem\Desktop\Caner\Ecommerce\ECommerce\DataAccess\obj\Debug\netcoreapp3.1\DataAccess.dll
 C:\Users\Gorkem\Desktop\Caner\Ecommerce\ECommerce\DataAccess\obj\Debug\netcoreapp3.1\DataAccess.pdb
-C:\Users\Gorkem\Desktop\Caner\Ecommerce\ECommerce\DataAccess\obj\Debug\netcoreapp3.1\DataAccess.csproj.CopyComplete

@@ -11,12 +11,12 @@ namespace Business.ElasticSearchOptions.Abstract
     {
         Task CheckIndex(string indexName);
         Task InsertDocument(string indexName, Product product);
-        Task InsertDocuments(string indexName, List<Product> products);
+        Task InsertDocuments(List<Product> products);
         Task<Product> GetDocument(string indexName, int id);
         Task<List<Product>> GetDocuments(string indexName);
         Task DeleteIndex(string indexName, int productId);
         Task AddOrUpdate(string indexName, Product product);
         Task<List<ProductElasticIndexDto>> SearchAsync(string searchText, Filter filter, string indexName, int skipItemCount, int maxItemCount);
-        Task CreateIndexAsync(string indexName, string aliasName);
+        //Task CreateIndexAsync(string indexName, string aliasName);
     }
 }
